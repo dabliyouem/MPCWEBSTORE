@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MPC/SRC WAREHOUSE - Product Catalog</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- EMBEDDED STYLES (100% Standalone - No css folder needed) -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+    body { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; background-color: #f8fafc; color: #0f172a; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border-radius: 9999px; background: rgba(0, 0, 0, 0.7); color: white; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; z-index: 10; transition: all 0.2s ease; }
+    .slider-arrow:hover { background: rgba(0, 0, 0, 0.95); transform: translateY(-50%) scale(1.08); }
+    .slider-arrow.prev { left: 8px; }
+    .slider-arrow.next { right: 8px; }
+    .slider-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 10; padding: 3px 6px; background: rgba(0, 0, 0, 0.4); border-radius: 9999px; }
+    .slider-dot { width: 5px; height: 5px; border-radius: 9999px; background: rgba(255, 255, 255, 0.5); transition: all 0.2s ease; }
+    .slider-dot.active { width: 14px; background: #ffffff; }
+    .product-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .product-card:hover { transform: translateY(-3px); box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.08); }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+
+  <!-- EMBEDDED CATALOG LOGIC & DATA (100% Standalone - No js folder needed) -->
+  <script>
+    var DEFAULT_PRODUCTS = [
+      {
+        "id": "prod-1789388006702",
+        "ref": "ARMOIR DUCATI",
+        "designation": "NA",
+        "category": "TABLEAUX ELECTRIQUES",
+        "type": "ENVELOPPE (TABLEAU & COFFRET)",
+        "qte": 1,
+        "unit": "pcs",
+        "images": [
+          "https://i.postimg.cc/SKFgbf6T/20260908-100721.jpg",
+          "https://i.postimg.cc/yN4LCym2/20260908-100731.jpg",
+          "https://i.postimg.cc/6QJMxfrb/20260908-100736.jpg",
+          "https://i.postimg.cc/q7V1Hxsm/20260908-100744.jpg",
+          "https://i.postimg.cc/x1b6Z4zZ/20260908-100748.jpg",
+          "https://i.postimg.cc/JzBpF2k5/20260908-100757.jpg",
+          "https://i.postimg.cc/GmsXf5yP/20260908-100806.jpg",
+          "https://i.postimg.cc/vZ60KNVf/20260908-100815.jpg",
+          "https://i.postimg.cc/sgZTLNhY/20260908-100831.jpg"
+        ],
+        "description": ""
+      },
+      {
+        "id": "prod-1788959259167",
+        "ref": "MCS20088PER5",
+        "designation": "Armoire au sol , simple porte en acier , IP 55 IK 10, 2000x800x800 - ELDON",
+        "category": "TABLEAUX ELECTRIQUES",
+        "type": "ENVELOPPE (TABLEAU & COFFRET)",
+        "qte": 1,
+        "unit": "pcs",
+        "images": [
+          "https://i.postimg.cc/x88nKdK9/20260908-100318.jpg",
+          "https://i.postimg.cc/mkkBQrQg/20260908-100329.jpg",
+          "https://i.postimg.cc/prrRDdDd/20260908-100336.jpg",
+          "https://i.postimg.cc/Y0Pk8w3p/20260908-100349.jpg"
+        ],
+        "description": "ARMOIRE CONTENANT DU MATRIEL A LINTRIEUR"
+      },
+      {
+        "id": "prod-1788958832925",
+        "ref": "NSYSF201080",
+        "designation": "Spacial SF - cellule - 1 porte - sans châssis - assemblé - 2000x1000x800mm",
+        "category": "TABLEAUX ELECTRIQUES",
+        "type": "ENVELOPPE (TABLEAU & COFFRET)",
+        "qte": 2,
+        "unit": "pcs",
+        "images": [
+          "https://i.postimg.cc/Gttdkpv6/20260908-095637.jpg",
+          "https://i.postimg.cc/KjjxnYt6/20260908-095646.jpg",
+          "https://i.postimg.cc/rssMSpS6/20260908-095654.jpg"
+        ],
+        "description": ""
+      },
+      {
+        "id": "prod-1788954675047",
+        "ref": "PODIV0103",
+        "designation": "Resistive Loadbank FCV-400:",
+        "category": "TABLEAUX ELECTRIQUES",
+        "type": "ENVELOPPE (TABLEAU & COFFRET)",
+        "qte": 1,
+        "unit": "pcs",
+        "images": [
+          "https://i.postimg.cc/mD8Tz91q/20260908-095144.jpg",
+          "https://i.postimg.cc/76mqGzJR/20260908-095202.jpg",
+          "https://i.postimg.cc/fLBMtd0Q/20260908-095211.jpg",
+          "https://i.postimg.cc/Xqq4wv9h/20260908-095225.jpg"
+        ],
+        "description": "IP23 includes 8 steps, Total min Power 400 kW @400 V, 3-ph, 50 HzStep 1,2,..8 @400 V : 50 kW(+/-10%), (3x3.2 Ohm, Y connected, 72 A)Resistor Element: Fe-Cr-Al Resistor Grids Cooling: By 1 x (20,000 m3/h, 400 V, 2.5 kW, 74 dB(A) fan) Air Intake: From below sides, underneath the loadbank Air Exhaust: From top side dischargeAir Flow: Vertical through elementsAs per attached design TR-4501 + Control BoxIncludes (380-400 VAC, 50 Hz, 2.5 kW) cooling fanstep switches, fuses, digital multimeter and step contactors and manual switching\""
+      },
+      {
+        "id": "prod-1788952134576",
+        "ref": "MIDI.161.600",
+        "designation": "ECRAN DE PROJECTIONS ESCAMOTABLE ET MOTORISÉ 600X375 KAUBER",
+        "category": "SYSTEME CFA",
+        "type": "AUDIO-VISUEL",
+        "qte": 3,
+        "unit": "pcs",
+        "images": [
+          "https://i.postimg.cc/768MjCBP/original-5uw-Lm-Rv-HQLv-C.jpg",
+          "https://i.postimg.cc/nzbYNsdF/original-bz-R3e-Juz59m.jpg",
+          "https://i.postimg.cc/FRDhdSkn/20260907-151535.jpg",
+          "https://i.postimg.cc/mD8Tz91p/20260907-160724.jpg"
+        ],
+        "description": "MIDI is a large format series of aluminum casing, electric projection screens. Timeless design and a wide selection of projection"
+      },
+      {
+        "id": "prod-1788951882589",
+        "ref": "MIDI.161.500",
+        "designation": "ECRAN DE PROJECTIONS ESCAMOTABLE ET MOTORISÉ 500X313 KAUBER",
+        "category": "SYSTEME CFA",
+        "type": "AUDIO-VISUEL",
+        "qte": 13,
+        "unit": "pcs",
+        "images": [
+          "https://i.postimg.cc/nzbYNsdF/original-bz-R3e-Juz59m.jpg",
+          "https://i.postimg.cc/768MjCBP/original-5uw-Lm-Rv-HQLv-C.jpg",
+          "https://i.postimg.cc/DZB7JG41/20260907-151530.jpg",
+          "https://i.postimg.cc/mD8Tz91p/20260907-160724.jpg"
+        ],
+        "description": "MIDI is a large format series of aluminum casing, electric projection screens. Timeless design and a wide selection of projection"
+      }
+    ];
+
+    var catalogProducts = [];
+    var activeCategory = 'ALL';
+    var searchQuery = '';
+    var sliderIndices = {};
+
+    function initCatalog() {
+      try {
+        var raw = localStorage.getItem('mpc_warehouse_products');
+        if (raw && raw !== '[]') {
+          var parsed = JSON.parse(raw);
+          if (parsed.length > 0 && parsed[0].id === 'prod-101') {
+            catalogProducts = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+            localStorage.setItem('mpc_warehouse_products', JSON.stringify(catalogProducts));
+          } else {
+            catalogProducts = parsed;
+          }
+        } else {
+          catalogProducts = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+        }
+      } catch(e) {
+        catalogProducts = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+      }
+
+      renderCategories();
+      renderProducts();
+
+      var search = document.getElementById('search-input');
+      if (search) {
+        search.addEventListener('input', function(e) {
+          searchQuery = e.target.value;
+          renderProducts();
+        });
+      }
+
+      var dropdown = document.getElementById('category-dropdown');
+      if (dropdown) {
+        dropdown.addEventListener('change', function(e) {
+          activeCategory = e.target.value;
+          syncPills();
+          renderProducts();
+        });
+      }
+
+      // Check admin status
+      var authBtn = document.getElementById('header-admin-link');
+      if (authBtn) {
+        var isAuth = localStorage.getItem('mpc_admin_auth') === 'true' || sessionStorage.getItem('mpc_admin_auth') === 'true';
+        if (isAuth) {
+          authBtn.href = 'admin.html';
+          authBtn.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 mr-1.5 inline-block"></span>Admin Panel';
+        }
+      }
+    }
+
+    function getUniqueCategories() {
+      var map = {};
+      for (var i = 0; i < catalogProducts.length; i++) {
+        var cat = catalogProducts[i].category;
+        if (cat) map[cat] = (map[cat] || 0) + 1;
+      }
+      return map;
+    }
+
+    function renderCategories() {
+      var dropdown = document.getElementById('category-dropdown');
+      var pills = document.getElementById('category-pills');
+      var cats = getUniqueCategories();
+
+      if (dropdown) {
+        var opts = '<option value="ALL">All Categories (' + catalogProducts.length + ')</option>';
+        for (var c in cats) {
+          opts += '<option value="' + escapeAttr(c) + '">' + escapeHtml(c) + ' (' + cats[c] + ')</option>';
+        }
+        dropdown.innerHTML = opts;
+      }
+
+      if (pills) {
+        var phtml = '<button type="button" onclick="setCat(\'ALL\')" class="cat-pill px-4 py-2 rounded-xl text-xs font-bold transition-all ' + (activeCategory === 'ALL' ? 'bg-black text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200') + '">All (' + catalogProducts.length + ')</button>';
+        for (var catName in cats) {
+          var isAct = activeCategory === catName;
+          phtml += '<button type="button" onclick="setCat(\'' + escapeAttr(catName) + '\')" class="cat-pill px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ' + (isAct ? 'bg-black text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200') + '">' + escapeHtml(catName) + ' <span class="opacity-60 text-[10px] ml-1">(' + cats[catName] + ')</span></button>';
+        }
+        pills.innerHTML = phtml;
+      }
+    }
+
+    function syncPills() {
+      var dropdown = document.getElementById('category-dropdown');
+      if (dropdown) dropdown.value = activeCategory;
+
+      var pills = document.getElementById('category-pills');
+      if (pills) {
+        var btns = pills.querySelectorAll('button');
+        for (var i = 0; i < btns.length; i++) {
+          var t = btns[i].textContent.trim();
+          if ((activeCategory === 'ALL' && t.indexOf('All') === 0) || t.indexOf(activeCategory) === 0) {
+            btns[i].className = 'cat-pill px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap bg-black text-white';
+          } else {
+            btns[i].className = 'cat-pill px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap bg-slate-100 text-slate-700 hover:bg-slate-200';
+          }
+        }
+      }
+    }
+
+    function setCat(name) {
+      activeCategory = name;
+      syncPills();
+      renderProducts();
+    }
+
+    function renderProducts() {
+      var container = document.getElementById('products-grid');
+      var countBadge = document.getElementById('catalog-count');
+      if (!container) return;
+
+      var list = [];
+      var q = searchQuery.toLowerCase().trim();
+
+      for (var i = 0; i < catalogProducts.length; i++) {
+        var p = catalogProducts[i];
+        if (activeCategory !== 'ALL' && p.category !== activeCategory) continue;
+        if (q) {
+          var matchRef = (p.ref || '').toLowerCase().indexOf(q) !== -1;
+          var matchDes = (p.designation || '').toLowerCase().indexOf(q) !== -1;
+          var matchCat = (p.category || '').toLowerCase().indexOf(q) !== -1;
+          if (!matchRef && !matchDes && !matchCat) continue;
+        }
+        list.push(p);
+      }
+
+      if (countBadge) countBadge.textContent = list.length + ' products';
+
+      if (list.length === 0) {
+        container.innerHTML = '<div class="col-span-full py-16 text-center text-slate-400 bg-white rounded-2xl border border-slate-200"><p class="font-bold text-slate-700">No products found</p><button onclick="setCat(\'ALL\')" class="mt-4 px-4 py-2 bg-black text-white text-xs font-bold rounded-xl">View All Products</button></div>';
+        return;
+      }
+
+      var html = '';
+      for (var j = 0; j < list.length; j++) {
+        var prod = list[j];
+        var imgs = (prod.images && prod.images.length > 0) ? prod.images : ['https://placehold.co/600x450?text=No+Photo'];
+        var current = sliderIndices[prod.id] || 0;
+        var hasMulti = imgs.length > 1;
+
+        html += '<div class="product-card bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col hover:border-slate-400 transition-all">' +
+          '<div class="relative aspect-[4/3] bg-slate-100 overflow-hidden">' +
+            '<div class="flex h-full transition-transform duration-300" id="track-' + prod.id + '" style="transform: translateX(-' + (current * 100) + '%);">' +
+              imgs.map(function(s) {
+                return '<div class="flex-shrink-0 w-full h-full cursor-pointer" onclick="window.location.href=\'product.html?id=' + prod.id + '\'">' +
+                  '<img src="' + escapeAttr(s) + '" alt="' + escapeAttr(prod.designation) + '" class="w-full h-full object-cover" loading="lazy" onerror="this.src=\'https://placehold.co/600x450?text=Photo\'">' +
+                '</div>';
+              }).join('') +
+            '</div>' +
+            (hasMulti ? (
+              '<button type="button" onclick="event.stopPropagation(); changeSlide(\'' + prod.id + '\', -1)" class="slider-arrow prev"><i class="fa-solid fa-chevron-left text-xs"></i></button>' +
+              '<button type="button" onclick="event.stopPropagation(); changeSlide(\'' + prod.id + '\', 1)" class="slider-arrow next"><i class="fa-solid fa-chevron-right text-xs"></i></button>' +
+              '<div class="slider-dots" id="dots-' + prod.id + '">' +
+                imgs.map(function(_, dotIdx) {
+                  return '<span class="slider-dot ' + (dotIdx === current ? 'active' : '') + '"></span>';
+                }).join('') +
+              '</div>'
+            ) : '') +
+          '</div>' +
+          '<div class="p-4 flex flex-col flex-grow cursor-pointer" onclick="window.location.href=\'product.html?id=' + prod.id + '\'">' +
+            '<div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">' + escapeHtml(prod.category) + '</div>' +
+            '<div class="flex items-center justify-between gap-2 mb-2">' +
+              '<span class="font-mono text-xs font-black bg-slate-100 text-slate-900 px-2 py-1 rounded border border-slate-200">REF: ' + escapeHtml(prod.ref) + '</span>' +
+              '<span class="text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">Qte: ' + prod.qte + ' ' + escapeHtml(prod.unit || 'pcs') + '</span>' +
+            '</div>' +
+            '<h3 class="font-bold text-sm text-slate-900 line-clamp-2 hover:text-black mb-3">' + escapeHtml(prod.designation) + '</h3>' +
+            '<div class="mt-auto pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-600">' +
+              '<span>View Details & Order</span>' +
+              '<i class="fa-solid fa-arrow-right text-[11px]"></i>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }
+      container.innerHTML = html;
+    }
+
+    function changeSlide(productId, delta) {
+      var prod = null;
+      for (var i = 0; i < catalogProducts.length; i++) {
+        if (catalogProducts[i].id === productId) { prod = catalogProducts[i]; break; }
+      }
+      if (!prod || !prod.images || prod.images.length <= 1) return;
+
+      var total = prod.images.length;
+      var cur = sliderIndices[productId] || 0;
+      cur = (cur + delta + total) % total;
+      sliderIndices[productId] = cur;
+
+      var track = document.getElementById('track-' + productId);
+      if (track) track.style.transform = 'translateX(-' + (cur * 100) + '%)';
+
+      var dotsContainer = document.getElementById('dots-' + productId);
+      if (dotsContainer) {
+        var dots = dotsContainer.querySelectorAll('.slider-dot');
+        for (var d = 0; d < dots.length; d++) {
+          dots[d].className = 'slider-dot ' + (d === cur ? 'active' : '');
+        }
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function escapeAttr(str) {
+      if (!str) return '';
+      return String(str).replace(/"/g, '&quot;');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initCatalog);
+    } else {
+      initCatalog();
+    }
+  </script>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col antialiased">
+
+  <!-- SINGLE TOP HEADER (BLACK) -->
+  <header class="bg-black text-white sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Title: MPC/SRC WAREHOUSE -->
+      <a href="index.html" class="flex items-center gap-2 text-white hover:opacity-90 transition-opacity">
+        <span class="text-lg sm:text-xl font-black tracking-tight">MPC/SRC WAREHOUSE</span>
+      </a>
+
+      <!-- Admin Panel Login Button -->
+      <div>
+        <a 
+          id="header-admin-link"
+          href="admin-login.html" 
+          class="px-3.5 py-2 rounded-xl text-xs font-bold border border-neutral-700 bg-neutral-900 hover:bg-neutral-800 transition-colors flex items-center gap-1.5 text-neutral-300"
+        >
+          Admin Login
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN CATALOG CONTENT -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-6">
+    
+    <!-- SEARCH & CATEGORY CONTROLS -->
+    <div class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <!-- Search Input -->
+        <div class="md:col-span-2 relative">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <i class="fa-solid fa-magnifying-glass text-xs"></i>
+          </div>
+          <input 
+            type="text" 
+            id="search-input"
+            placeholder="Search by product designation or reference code..." 
+            class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all"
+          >
+        </div>
+
+        <!-- Category Dropdown List -->
+        <div>
+          <label for="category-dropdown" class="sr-only">Category Dropdown</label>
+          <select 
+            id="category-dropdown" 
+            class="w-full py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer"
+          >
+            <option value="ALL">All Categories</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Quick Category Buttons / Pills -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 hide-scrollbar" id="category-pills">
+        <!-- Injected dynamically -->
+      </div>
+
+    </div>
+
+    <!-- Product Count Info -->
+    <div class="flex items-center justify-between text-xs text-slate-500 font-medium px-1">
+      <div>Available Stock: <span id="catalog-count" class="font-bold text-slate-900">0 items</span></div>
+      <div>Click any item to view photos and place direct WhatsApp order</div>
+    </div>
+
+    <!-- PRODUCT GRID TABLE -->
+    <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <!-- Injected dynamically -->
+    </div>
+
+  </main>
+
+  <!-- MINIMAL FOOTER -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-2.5 text-slate-400">
+      <span class="text-[11px] font-medium uppercase tracking-wider text-slate-400">Website Developed by</span>
+      <a href="https://github.com/dabliyouem" target="_blank" rel="noopener noreferrer" class="inline-flex items-center hover:opacity-85 transition-all transform hover:scale-105" title="Developer">
+        <img src="developer-logo.png" alt="Developer Logo" class="h-8 w-auto object-contain">
+      </a>
+    </div>
+  </footer>
+
+</body>
+</html>

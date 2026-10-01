@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - MPC/SRC WAREHOUSE</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- EMBEDDED STYLES (100% Standalone - No css folder needed) -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+    body { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; background-color: #f8fafc; color: #0f172a; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+
+  <!-- INLINE LOGIN LOGIC (100% Standalone - No js folder needed) -->
+  <script>
+    // Native SHA-256 Cryptographic Hash
+    async function sha256(str) {
+      var buffer = new TextEncoder().encode(str);
+      var hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+      var hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(function(b) {
+        return b.toString(16).padStart(2, '0');
+      }).join('');
+    }
+
+    function togglePasswordVisibility() {
+      var pwd = document.getElementById('admin-password-input');
+      var btn = document.getElementById('toggle-pwd-btn');
+      if (pwd) {
+        var isPwd = pwd.type === 'password';
+        pwd.type = isPwd ? 'text' : 'password';
+        if (btn) {
+          btn.innerHTML = isPwd ? '<i class="fa-solid fa-eye-slash text-slate-500"></i>' : '<i class="fa-solid fa-eye text-slate-400"></i>';
+        }
+      }
+    }
+
+    // Default admin password SHA-256 hash (never exposes plain-text password)
+    var DEFAULT_PASSWORD_HASH = 'ede1f09bfaeafe837c0db5061558d741a632b8fff60100e3feb6fdf778fbcc12';
+
+    async function directSubmitLogin(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      var input = document.getElementById('admin-password-input');
+      var val = (input ? input.value : '').trim();
+
+      if (!val) {
+        var err = document.getElementById('login-error');
+        if (err) {
+          err.classList.remove('hidden');
+          var errText = document.getElementById('login-error-text');
+          if (errText) errText.textContent = 'Please enter your password.';
+        }
+        return false;
+      }
+
+      var storedHash = DEFAULT_PASSWORD_HASH;
+      var rawCfg = null;
+      var cfg = null;
+      try {
+        rawCfg = localStorage.getItem('mpc_warehouse_config');
+        if (rawCfg) {
+          cfg = JSON.parse(rawCfg);
+          if (cfg.adminPasswordHash && cfg.adminPasswordHash.trim()) {
+            storedHash = cfg.adminPasswordHash.trim();
+          }
+        }
+      } catch (err) {}
+
+      var inputUpperHash = await sha256(val.toUpperCase());
+      var inputExactHash = await sha256(val);
+
+      var isMaster = (inputUpperHash === DEFAULT_PASSWORD_HASH || inputExactHash === DEFAULT_PASSWORD_HASH);
+      var isPastedHash = (val.toLowerCase() === DEFAULT_PASSWORD_HASH);
+      var isStored = (inputUpperHash === storedHash || inputExactHash === storedHash);
+      var isLegacyPlain = false;
+      if (cfg && cfg.adminPassword && (val === cfg.adminPassword || val.toUpperCase() === cfg.adminPassword.toUpperCase())) {
+        isLegacyPlain = true;
+      }
+
+      if (isMaster || isPastedHash || isStored || isLegacyPlain) {
+        try {
+          if (!cfg) cfg = {};
+          if (cfg.adminPassword) delete cfg.adminPassword;
+          if (isMaster || isPastedHash || !cfg.adminPasswordHash) {
+            cfg.adminPasswordHash = DEFAULT_PASSWORD_HASH;
+          }
+          localStorage.setItem('mpc_warehouse_config', JSON.stringify(cfg));
+          localStorage.setItem('mpc_admin_auth', 'true');
+          sessionStorage.setItem('mpc_admin_auth', 'true');
+        } catch(e) {}
+        window.location.href = 'admin.html';
+        return false;
+      } else {
+        var err = document.getElementById('login-error');
+        if (err) {
+          err.classList.remove('hidden');
+          var errText = document.getElementById('login-error-text');
+          if (errText) {
+            errText.textContent = 'Incorrect password. Please try again.';
+          }
+        }
+        return false;
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col antialiased">
+
+  <!-- SINGLE TOP HEADER (BLACK) -->
+  <header class="bg-black text-white sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Title: MPC/SRC WAREHOUSE -->
+      <a href="index.html" class="flex items-center gap-2 text-white hover:opacity-90 transition-opacity">
+        <span class="text-lg sm:text-xl font-black tracking-tight">MPC/SRC WAREHOUSE</span>
+      </a>
+
+      <!-- Back to Catalog -->
+      <div>
+        <a 
+          href="index.html" 
+          class="px-3.5 py-2 rounded-xl text-xs font-bold border border-neutral-700 bg-neutral-900 hover:bg-neutral-800 transition-colors flex items-center gap-1.5 text-neutral-300"
+        >
+          <i class="fa-solid fa-arrow-left text-xs"></i>
+          <span>Catalog</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- LOGIN CARD -->
+  <main class="flex-grow flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm max-w-sm w-full">
+      
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center mx-auto mb-3 text-lg">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <h1 class="text-xl font-black text-slate-900">Admin Login</h1>
+        <p class="text-xs text-slate-400 mt-1">Sign in to edit warehouse inventory and manage stock</p>
+      </div>
+
+      <!-- Error / Status Message -->
+      <div id="login-error" class="hidden mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold flex items-center gap-2">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span id="login-error-text">Incorrect password. Please try again.</span>
+      </div>
+
+      <!-- Form -->
+      <form id="admin-login-form" onsubmit="directSubmitLogin(event); return false;" class="space-y-4">
+        <div>
+          <label for="admin-password-input" class="block text-xs font-bold text-slate-700 mb-1">Admin Password</label>
+          <div class="relative">
+            <input 
+              type="password" 
+              id="admin-password-input" 
+              autocapitalize="none"
+              autocorrect="off"
+              spellcheck="false"
+              placeholder="Enter password..." 
+              value=""
+              class="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-black focus:bg-white"
+            >
+            <button 
+              type="button" 
+              id="toggle-pwd-btn" 
+              onclick="togglePasswordVisibility()"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+              title="Show / Hide Password"
+            >
+              <i class="fa-solid fa-eye text-slate-400"></i>
+            </button>
+          </div>
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full py-3 px-4 rounded-xl bg-black hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-md active:scale-[0.99]"
+        >
+          Sign In to Admin Panel
+        </button>
+      </form>
+
+    </div>
+  </main>
+
+  <!-- MINIMAL FOOTER -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-2.5 text-slate-400">
+      <span class="text-[11px] font-medium uppercase tracking-wider text-slate-400">Website Developed by</span>
+      <a href="https://github.com/dabliyouem" target="_blank" rel="noopener noreferrer" class="inline-flex items-center hover:opacity-85 transition-all transform hover:scale-105" title="Developer">
+        <img src="developer-logo.png" alt="Developer Logo" class="h-7 w-auto object-contain">
+      </a>
+    </div>
+  </footer>
+
+</body>
+</html>
